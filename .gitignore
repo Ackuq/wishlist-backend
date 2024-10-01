@@ -7,3 +7,6 @@ go.work.sum
 
 # env file
 .env
+
+# build outputs
+out

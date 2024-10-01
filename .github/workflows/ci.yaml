@@ -19,7 +19,7 @@ jobs:
         run: go mod download
 
       - name: Check format
-        run: gofmt -s -w . && git diff --exit-code
+        run: test -z $(gofmt -l .)
 
       - name: Lint
         run: go vet ./...
