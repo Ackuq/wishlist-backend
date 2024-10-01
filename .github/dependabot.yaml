@@ -7,7 +7,35 @@ updates:
     directory: /
     schedule:
       interval: daily
-      time: '06:00'
+      time: "06:00"
       timezone: Europe/Stockholm
+    groups:
+      production-dependencies-major:
+        dependency-type: "production"
+        update-types:
+          - major
+      production-dependencies-minor:
+        dependency-type: "production"
+        update-types:
+          - minor
+          - patch
+      development-dependencies-major:
+        dependency-type: "development"
+        update-types:
+          - major
+      development-dependencies-minor:
+        dependency-type: "development"
+        update-types:
+          - minor
+          - patch
+    reviewers:
+      - ackuq
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+      time: "06:00"
+      timezone: "Europe/Stockholm"
     reviewers:
       - ackuq

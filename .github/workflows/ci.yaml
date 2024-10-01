@@ -1,0 +1,37 @@
+name: CI
+
+on: push
+
+jobs:
+  check:
+    name: Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./go.mod
+
+      - name: Check format
+        run: gofmt -s -w . && git diff --exit-code
+
+      - name: Lint
+        run: go vet ./...
+
+      - name: Run tidy
+        run: go mod tidy -diff
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Verify modules
+        run: go mod verify
+
+      - name: Build
+        run: go build -o /dev/null ./...
+
+      - name: Test
+        run: go -v -race -shuffle=on -coverprofile=coverage.txt test
