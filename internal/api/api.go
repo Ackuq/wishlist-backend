@@ -4,12 +4,17 @@ import (
 	"net/http"
 
 	"github.com/ackuq/wishlist-backend/internal/api/handlers"
+	"github.com/ackuq/wishlist-backend/internal/api/parser"
 	"github.com/ackuq/wishlist-backend/internal/api/routes"
 	"github.com/ackuq/wishlist-backend/internal/config"
+	"github.com/ackuq/wishlist-backend/internal/db"
 )
 
-func NewApi(handlers *handlers.Handlers, config *config.Config) error {
-	mux := routes.InitializeRoutes(handlers)
+func New(queries *db.Queries, config *config.Config) error {
+	parser := parser.New()
+	handlers := handlers.New(queries, parser)
 
-	return http.ListenAndServe(config.Host, mux)
+	router := routes.New(handlers)
+
+	return http.ListenAndServe(config.Host, router)
 }

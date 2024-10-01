@@ -1,8 +1,12 @@
 package models
 
+type User struct {
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
 type CreateUser struct {
-	Id       int
-	Name     string
-	Email    string
-	Password []byte
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }

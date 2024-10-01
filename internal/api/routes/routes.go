@@ -6,10 +6,14 @@ import (
 	"github.com/ackuq/wishlist-backend/internal/api/handlers"
 )
 
-func InitializeRoutes(handlers *handlers.Handlers) *http.ServeMux {
-	mux := http.NewServeMux()
+func New(handlers *handlers.Handlers) *http.ServeMux {
+	router := http.NewServeMux()
 
-	mux.Handle(UserRoutePrefix+"/", UserMux(handlers))
+	router.Handle(userRoutePrefix+"/", userRoutes(handlers))
 
-	return mux
+	return router
+}
+
+func wrapHandler(handler func(res http.ResponseWriter, req *http.Request)) http.Handler {
+	return http.HandlerFunc(handler)
 }

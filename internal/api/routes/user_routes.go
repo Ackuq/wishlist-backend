@@ -6,12 +6,12 @@ import (
 	"github.com/ackuq/wishlist-backend/internal/api/handlers"
 )
 
-const UserRoutePrefix = "/api/v1/user"
+const userRoutePrefix = "/api/v1/user"
 
-func UserMux(handlers *handlers.Handlers) http.Handler {
-	userMux := http.NewServeMux()
+func userRoutes(handlers *handlers.Handlers) http.Handler {
+	userRouter := http.NewServeMux()
 
-	userMux.Handle("POST /", handlers.UserHandler.CreateUser())
+	userRouter.Handle("POST /", wrapHandler(handlers.CreateUser))
 
-	return http.StripPrefix(UserRoutePrefix, userMux)
+	return http.StripPrefix(userRoutePrefix, userRouter)
 }
