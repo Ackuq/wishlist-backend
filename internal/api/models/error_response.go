@@ -36,3 +36,10 @@ func NotFoundError(message string) ErrorObject {
 		Message: message,
 	}
 }
+
+func BadRequestError(message string) ErrorObject {
+	return ErrorObject{
+		Type:    "BadRequest",
+		Message: message,
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ackuq/wishlist-backend/internal/api/models"
+	"github.com/ackuq/wishlist-backend/internal/customerrors"
 	"github.com/ackuq/wishlist-backend/internal/logger"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
@@ -24,8 +25,11 @@ func (handlers *Handlers) errorToHttpObjects(err error, locale string) (int, []m
 		return http.StatusBadRequest, handlers.schemaValidator.GetTranslationErrors(validationErrors, locale)
 	}
 
-	if err == pgx.ErrNoRows {
+	switch err {
+	case pgx.ErrNoRows:
 		return http.StatusNotFound, []models.ErrorObject{models.NotFoundError(err.Error())}
+	case customerrors.ErrJSONDecoding:
+		return http.StatusBadRequest, []models.ErrorObject{models.NotFoundError(err.Error())}
 	}
 
 	if dbError, ok := err.(*pgconn.PgError); ok {

@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/ackuq/wishlist-backend/internal/api/models"
+	"github.com/ackuq/wishlist-backend/internal/customerrors"
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
@@ -36,8 +37,7 @@ func (schemaValidator *SchemaValidator) BindJSON(req *http.Request, result any) 
 	err := json.NewDecoder(req.Body).Decode(result)
 
 	if err != nil {
-		// TODO: Better handle decoding errors
-		return err
+		return customerrors.ErrJSONDecoding
 	}
 
 	value := reflect.ValueOf(result)
