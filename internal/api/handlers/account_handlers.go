@@ -5,6 +5,7 @@ import (
 
 	"github.com/ackuq/wishlist-backend/internal/api/models"
 	"github.com/ackuq/wishlist-backend/internal/db/queries"
+	"github.com/google/uuid"
 )
 
 func (handlers *Handlers) CreateAccount(res http.ResponseWriter, req *http.Request) {
@@ -28,14 +29,14 @@ func (handlers *Handlers) CreateAccount(res http.ResponseWriter, req *http.Reque
 }
 
 func (handlers *Handlers) GetAccount(res http.ResponseWriter, req *http.Request) {
-	id, err := handlers.schemaValidator.ValidateUUID(req.PathValue("id"))
+	id, err := uuid.Parse(req.PathValue("id"))
 
 	if err != nil {
 		handlers.handleError(res, req, err)
 		return
 	}
 
-	account, err := handlers.queries.GetAccount(req.Context(), *id)
+	account, err := handlers.queries.GetAccount(req.Context(), id)
 
 	if err != nil {
 		handlers.handleError(res, req, err)

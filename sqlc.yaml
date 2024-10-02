@@ -12,6 +12,11 @@ sql:
         out: internal/db/queries
         output_db_file_name: queries.go
         sql_package: pgx/v5
+        overrides:
+          - db_type: uuid
+            go_type:
+              import: github.com/google/uuid
+              type: UUID
     database:
       uri: postgres://postgres:password@localhost:5432/wishlist
     rules:

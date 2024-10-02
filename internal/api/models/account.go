@@ -1,11 +1,11 @@
 package models
 
-import "github.com/jackc/pgx/v5/pgtype"
+import "github.com/google/uuid"
 
 type Account struct {
-	ID    pgtype.UUID `json:"id"`
-	Name  string      `json:"name"`
-	Email string      `json:"email"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Email string    `json:"email"`
 }
 
 type CreateAccount struct {
