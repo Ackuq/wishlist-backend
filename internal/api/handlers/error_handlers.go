@@ -4,8 +4,8 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/ackuq/wishlist-backend/internal/api/customerrors"
 	"github.com/ackuq/wishlist-backend/internal/api/models"
-	"github.com/ackuq/wishlist-backend/internal/customerrors"
 	"github.com/ackuq/wishlist-backend/internal/logger"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"

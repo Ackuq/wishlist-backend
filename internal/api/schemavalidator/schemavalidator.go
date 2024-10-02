@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"reflect"
 
+	"github.com/ackuq/wishlist-backend/internal/api/customerrors"
 	"github.com/ackuq/wishlist-backend/internal/api/models"
-	"github.com/ackuq/wishlist-backend/internal/customerrors"
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
