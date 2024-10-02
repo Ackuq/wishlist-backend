@@ -7,18 +7,16 @@ import (
 )
 
 func (handlers *Handlers) CreateUser(res http.ResponseWriter, req *http.Request) {
-	var createUser models.CreateUser
-
 	body := &models.CreateUser{}
-	if err := handlers.parser.BindJSON(req, body); err != nil {
-		handleError(res, req, err)
+	if err := handlers.schemaValidator.BindJSON(req, body); err != nil {
+		handlers.handleError(res, req, err)
 		return
 	}
 
-	err := handlers.queries.CreateUser(&createUser)
+	err := handlers.queries.CreateUser(body)
 
 	if err != nil {
-		handleError(res, req, err)
+		handlers.handleError(res, req, err)
 		return
 	}
 

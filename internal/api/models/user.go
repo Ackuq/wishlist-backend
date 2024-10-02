@@ -7,6 +7,6 @@ type User struct {
 }
 
 type CreateUser struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Name  string `json:"name" validate:"required"`
+	Email string `json:"email" validate:"required,email"`
 }

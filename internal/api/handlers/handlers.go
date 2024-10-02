@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ackuq/wishlist-backend/internal/api/parser"
+	"github.com/ackuq/wishlist-backend/internal/api/schemavalidator"
 	"github.com/ackuq/wishlist-backend/internal/db"
 	"github.com/ackuq/wishlist-backend/internal/logger"
 	"go.uber.org/zap"
 )
 
 type Handlers struct {
-	queries *db.Queries
-	parser  *parser.Parser
+	queries         *db.Queries
+	schemaValidator *schemavalidator.SchemaValidator
 }
 
-func New(queries *db.Queries, parser *parser.Parser) *Handlers {
-	return &Handlers{queries, parser}
+func New(queries *db.Queries, schemaValidator *schemavalidator.SchemaValidator) *Handlers {
+	return &Handlers{queries, schemaValidator}
 }
 
 func writeJSONResponse(res http.ResponseWriter, status int, data interface{}) {
