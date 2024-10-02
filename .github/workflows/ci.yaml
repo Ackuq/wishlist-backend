@@ -67,7 +67,7 @@ jobs:
       - name: Setup migrate
         run: |
           curl -L https://github.com/golang-migrate/migrate/releases/download/${MIGRATE_VERSION}/migrate.${MIGRATE_DISTRIBUTION}.tar.gz | tar xvz
-          sudo mv migrate.${MIGRATE_DISTRIBUTION} /usr/bin/migrate
+          sudo mv migrate /usr/bin/migrate
           which migrate
         env:
           MIGRATE_VERSION: v4.18.1
