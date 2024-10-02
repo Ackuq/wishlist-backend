@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/sqlc-dev/sqlc/df9413cf03462528e6f7d80784230f8769a120ba/internal/config/v_two.json
+
 version: "2"
 
 sql:
@@ -10,3 +12,7 @@ sql:
         out: internal/db/queries
         output_db_file_name: queries.go
         sql_package: pgx/v5
+    database:
+      uri: postgres://postgres:password@localhost:5432/wishlist
+    rules:
+      - sqlc/db-prepare
