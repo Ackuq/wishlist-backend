@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/ackuq/wishlist-backend/internal/api/schemavalidator"
 	"github.com/ackuq/wishlist-backend/internal/db"
 	"github.com/ackuq/wishlist-backend/internal/logger"
-	"go.uber.org/zap"
 )
 
 type Handlers struct {
@@ -25,12 +25,12 @@ func writeJSONResponse(res http.ResponseWriter, status int, data interface{}) {
 	js, err := json.MarshalIndent(data, "", "  ")
 
 	if err != nil {
-		logger.Logger.Error("Error marshaling JSON", zap.Error(err))
+		slog.Error("Error marshaling JSON", logger.ErrorAtr(err))
 		return
 	}
 
 	_, err = res.Write(js)
 	if err != nil {
-		logger.Logger.Error("Error writing JSON response", zap.Error(err))
+		slog.Error("Error writing JSON response", logger.ErrorAtr(err))
 	}
 }

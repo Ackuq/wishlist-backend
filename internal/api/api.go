@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/ackuq/wishlist-backend/internal/api/handlers"
@@ -9,7 +10,6 @@ import (
 	"github.com/ackuq/wishlist-backend/internal/api/schemavalidator"
 	"github.com/ackuq/wishlist-backend/internal/config"
 	"github.com/ackuq/wishlist-backend/internal/db"
-	"github.com/ackuq/wishlist-backend/internal/logger"
 )
 
 func New(queries *db.Queries, config *config.Config) error {
@@ -18,6 +18,6 @@ func New(queries *db.Queries, config *config.Config) error {
 
 	router := routes.New(handlers)
 
-	logger.Logger.Info(fmt.Sprintf("Listing on host %s", config.Host))
+	slog.Info(fmt.Sprintf("Listing on host %s", config.Host))
 	return http.ListenAndServe(config.Host, router)
 }

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/ackuq/wishlist-backend/internal/api/models"
@@ -8,7 +9,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"go.uber.org/zap"
 )
 
 func (handlers *Handlers) handleError(res http.ResponseWriter, req *http.Request, err error) {
@@ -35,7 +35,7 @@ func (handlers *Handlers) errorToHttpObjects(err error, locale string) (int, []m
 				[]models.ErrorObject{models.ConflictError(err.Error())}
 		}
 	}
-	logger.Logger.Error(zap.Error(err))
+	slog.Error("Unknown server error", logger.ErrorAtr(err))
 	return http.StatusInternalServerError,
 		[]models.ErrorObject{models.ServerError(err.Error())}
 }
