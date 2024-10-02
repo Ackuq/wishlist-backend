@@ -42,3 +42,44 @@ jobs:
       - name: Test
         # TODO: Report the coverage
         run: go test -v -count=1 -race -shuffle=on -coverprofile=coverage.txt ./...
+
+  check-sql:
+    name: Check database queries
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16.4
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: wishlist
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup migrate
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/${MIGRATE_VERSION}/migrate.${MIGRATE_DISTRIBUTION}.tar.gz | tar xvz
+          sudo mv migrate /usr/bin/migrate
+          which migrate
+        env:
+          MIGRATE_VERSION: v4.18.1
+          MIGRATE_DISTRIBUTION: linux-amd64
+
+      - name: Setup SQLC
+        uses: sqlc-dev/setup-sqlc@v4
+        with:
+          sqlc-version: 1.27.0
+
+      - name: Run migrations
+        run: make migrate
+
+      - name: Lint queries
+        run: sqlc vet

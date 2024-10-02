@@ -4,8 +4,5 @@ services:
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: wishlist
-      POSTGRES_USER: postgres
-      POSTGRES_HOST: 0.0.0.0
-      POSTGRES_PORT: 5432
     ports:
       - "5432:5432"

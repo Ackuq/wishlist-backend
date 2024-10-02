@@ -73,6 +73,14 @@ make migrate-down
 make migrate-down n=2
 ```
 
+### Going to a specific version
+
+You can go to a specific migration version, applying the required up and down migrations, with the following command.
+
+```sh
+make migrate-goto version=1
+```
+
 ## Queries
 
 This project uses sqlc to generate Go code bindings from raw SQL queries. To create SQL queries, add the desired SQL to file in `./internal/db/queries/`. Prefix the filename with the table that you are operating on.
@@ -91,4 +99,14 @@ Generating the code binding is done by running the following command.
 
 ```sh
 sqlc generate
+```
+
+### Linting queries
+
+> **NOTE:** Linting queries require the DB to be running and at the latest migration
+
+You can lint the queries you create by running the following SQLC command.
+
+```sh
+sqlc vet
 ```

@@ -11,7 +11,7 @@ MIGRATIONS_DIR=./internal/db/migrations
 # Migration definitions
 DATABASE_URL=postgres://postgres:password@localhost:5432/wishlist?sslmode=disable
 
-.PHONY: all run build clean format test migrate migrate-down create-migration
+.PHONY: all run build clean format test migrate migrate-down migrate-goto create-migration
 
 
 # Application
@@ -44,6 +44,9 @@ migrate:
 
 migrate-down:
 	migrate -database $(DATABASE_URL) -path $(MIGRATIONS_DIR) down $(n)
+
+migrate-goto:
+	migrate -database $(DATABASE_URL) -path $(MIGRATIONS_DIR) goto $(version)
 
 create-migration:
 	migrate create -ext sql -dir $(MIGRATIONS_DIR) --digits=4 -seq $(name)
