@@ -71,7 +71,7 @@ jobs:
           which migrate
         env:
           MIGRATE_VERSION: v4.18.1
-          MIGRATE_DISTRIBUTION: linux-arm64
+          MIGRATE_DISTRIBUTION: linux-amd4
 
       - name: Setup SQLC
         uses: sqlc-dev/setup-sqlc@v4
