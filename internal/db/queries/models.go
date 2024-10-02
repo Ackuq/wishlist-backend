@@ -5,11 +5,11 @@
 package queries
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 type Account struct {
-	ID    pgtype.UUID
+	ID    uuid.UUID
 	Name  string
 	Email string
 }
