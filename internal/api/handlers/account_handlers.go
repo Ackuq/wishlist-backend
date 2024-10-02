@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/ackuq/wishlist-backend/internal/api/models"
-	"github.com/ackuq/wishlist-backend/internal/db"
+	"github.com/ackuq/wishlist-backend/internal/db/queries"
 )
 
 func (handlers *Handlers) CreateAccount(res http.ResponseWriter, req *http.Request) {
@@ -14,7 +14,7 @@ func (handlers *Handlers) CreateAccount(res http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	_, err := handlers.queries.CreateAccount(req.Context(), db.CreateAccountParams{
+	_, err := handlers.queries.CreateAccount(req.Context(), queries.CreateAccountParams{
 		Name:  body.Name,
 		Email: body.Email,
 	})

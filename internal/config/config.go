@@ -7,7 +7,7 @@ import (
 
 type Config struct {
 	Host     string
-	DataBase struct {
+	Database struct {
 		URL string
 	}
 }
@@ -17,7 +17,7 @@ func GetConfig() *Config {
 
 	flag.StringVar(&config.Host, "host", os.Getenv("HOST"), "API server host")
 
-	flag.StringVar(&config.DataBase.URL, "db-url", os.Getenv("DB_URL"), "Database name")
+	flag.StringVar(&config.Database.URL, "db-url", os.Getenv("DB_URL"), "Database name")
 
 	return config
 }
