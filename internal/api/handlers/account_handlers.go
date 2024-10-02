@@ -1,0 +1,71 @@
+package handlers
+
+import (
+	"net/http"
+
+	"github.com/ackuq/wishlist-backend/internal/api/models"
+	"github.com/ackuq/wishlist-backend/internal/db"
+)
+
+func (handlers *Handlers) CreateAccount(res http.ResponseWriter, req *http.Request) {
+	body := &models.CreateAccount{}
+	if err := handlers.schemaValidator.BindJSON(req, body); err != nil {
+		handlers.handleError(res, req, err)
+		return
+	}
+
+	_, err := handlers.queries.CreateAccount(req.Context(), db.CreateAccountParams{
+		Name:  body.Name,
+		Email: body.Email,
+	})
+
+	if err != nil {
+		handlers.handleError(res, req, err)
+		return
+	}
+
+	res.WriteHeader(http.StatusCreated)
+}
+
+func (handlers *Handlers) GetAccount(res http.ResponseWriter, req *http.Request) {
+	id, err := handlers.schemaValidator.ValidateUUID(req.PathValue("id"))
+
+	if err != nil {
+		handlers.handleError(res, req, err)
+		return
+	}
+
+	account, err := handlers.queries.GetAccount(req.Context(), *id)
+
+	if err != nil {
+		handlers.handleError(res, req, err)
+		return
+	}
+
+	response := models.Account{
+		ID:    account.ID,
+		Name:  account.Name,
+		Email: account.Email,
+	}
+
+	writeJSONResponse(res, http.StatusOK, response)
+}
+
+func (handlers *Handlers) ListAccounts(res http.ResponseWriter, req *http.Request) {
+	accounts, err := handlers.queries.ListAccounts(req.Context())
+
+	if err != nil {
+		handlers.handleError(res, req, err)
+	}
+
+	response := make([]models.Account, len(accounts))
+	for i, account := range accounts {
+		response[i] = models.Account{
+			ID:    account.ID,
+			Name:  account.Name,
+			Email: account.Email,
+		}
+	}
+
+	writeJSONResponse(res, http.StatusOK, response)
+}

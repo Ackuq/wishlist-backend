@@ -1,13 +1,36 @@
 package handlers
 
-import "github.com/ackuq/wishlist-backend/internal/db/repositories"
+import (
+	"encoding/json"
+	"log/slog"
+	"net/http"
+
+	"github.com/ackuq/wishlist-backend/internal/api/schemavalidator"
+	"github.com/ackuq/wishlist-backend/internal/db"
+	"github.com/ackuq/wishlist-backend/internal/logger"
+)
 
 type Handlers struct {
-	UserHandler *UserHandler
+	queries         *db.Queries
+	schemaValidator *schemavalidator.SchemaValidator
 }
 
-func NewHandlers(repo *repositories.Repositories) *Handlers {
-	return &Handlers{
-		UserHandler: NewUserHandler(repo.UserRepository),
+func New(queries *db.Queries, schemaValidator *schemavalidator.SchemaValidator) *Handlers {
+	return &Handlers{queries, schemaValidator}
+}
+
+func writeJSONResponse(res http.ResponseWriter, status int, data interface{}) {
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(status)
+	js, err := json.MarshalIndent(data, "", "  ")
+
+	if err != nil {
+		slog.Error("Error marshaling JSON", logger.ErrorAtr(err))
+		return
+	}
+
+	_, err = res.Write(js)
+	if err != nil {
+		slog.Error("Error writing JSON response", logger.ErrorAtr(err))
 	}
 }

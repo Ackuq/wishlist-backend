@@ -27,6 +27,12 @@ jobs:
       - name: Run tidy
         run: go mod tidy -diff
 
+      - uses: dominikh/staticcheck-action@v1.2.0
+        name: Run staticcheck
+        with:
+          version: "2024.1.1"
+          install-go: false
+
       - name: Verify modules
         run: go mod verify
 

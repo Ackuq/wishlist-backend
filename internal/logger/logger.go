@@ -1,26 +1,16 @@
 package logger
 
 import (
-	"log"
-
-	"go.uber.org/zap"
+	"log/slog"
+	"os"
 )
 
-var Logger *zap.SugaredLogger
-
 func InitLogger() {
-	logger, err := zap.NewProduction()
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	Logger = logger.Sugar()
+	slog.SetDefault(logger)
 }
 
-func CloseLogger() {
-	if Logger != nil {
-		Logger.Info("Closing logger")
-		Logger.Sync()
-	}
+func ErrorAtr(err error) slog.Attr {
+	return slog.Any("error", err)
 }

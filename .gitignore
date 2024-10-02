@@ -10,3 +10,6 @@ go.work.sum
 
 # build outputs
 out
+
+# VSCode debug binary
+__debug_bin*
