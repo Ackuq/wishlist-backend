@@ -6,16 +6,16 @@ import (
 	"net/http"
 
 	"github.com/ackuq/wishlist-backend/internal/api/schemavalidator"
-	"github.com/ackuq/wishlist-backend/internal/db"
+	"github.com/ackuq/wishlist-backend/internal/db/queries"
 	"github.com/ackuq/wishlist-backend/internal/logger"
 )
 
 type Handlers struct {
-	queries         *db.Queries
+	queries         *queries.Queries
 	schemaValidator *schemavalidator.SchemaValidator
 }
 
-func New(queries *db.Queries, schemaValidator *schemavalidator.SchemaValidator) *Handlers {
+func New(queries *queries.Queries, schemaValidator *schemavalidator.SchemaValidator) *Handlers {
 	return &Handlers{queries, schemaValidator}
 }
 

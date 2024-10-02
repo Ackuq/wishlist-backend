@@ -6,7 +6,7 @@ sql:
     schema: internal/db/migrations
     gen:
       go:
-        package: db
-        out: internal/db
+        package: queries
+        out: internal/db/queries
         output_db_file_name: queries.go
         sql_package: pgx/v5

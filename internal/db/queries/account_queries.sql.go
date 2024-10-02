@@ -3,7 +3,7 @@
 //   sqlc v1.27.0
 // source: account_queries.sql
 
-package db
+package queries
 
 import (
 	"context"
