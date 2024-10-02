@@ -33,6 +33,8 @@ func main() {
 	}
 	defer conn.Close(context.Background())
 
+	// TODO: Migrate on start
+
 	// Init queries
 	queries := db.New(conn)
 
