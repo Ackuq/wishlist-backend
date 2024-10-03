@@ -34,6 +34,10 @@ type Claims struct {
 	EmailVerified bool   `json:"email_verified"`
 }
 
+const StateSessionKey = "state"
+const AccessTokenSessionKey = "access_token"
+const ClaimsSessionKey = "claims"
+
 func New(config *config.Config) (*Authenticator, error) {
 
 	provider, err := oidc.NewProvider(

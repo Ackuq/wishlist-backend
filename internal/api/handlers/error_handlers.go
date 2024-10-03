@@ -5,26 +5,27 @@ import (
 	"net/http"
 
 	"github.com/ackuq/wishlist-backend/internal/api/models"
+	"github.com/ackuq/wishlist-backend/internal/api/schemavalidator"
 	"github.com/ackuq/wishlist-backend/internal/logger"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-func (handlers *Handlers) handleError(res http.ResponseWriter, req *http.Request, err error) {
+func HandleError(res http.ResponseWriter, req *http.Request, err error) {
 	locale := req.Header.Get("Accept-Language")
-	status, errors := handlers.errorToHttpObjects(err, locale)
+	status, errors := errorToHttpObjects(err, locale)
 
 	writeJSONResponse(res, status, models.ErrorResponse{Errors: errors})
 }
 
-func (handlers *Handlers) handleCustomError(res http.ResponseWriter, err models.ErrorObject) {
+func HandleCustomError(res http.ResponseWriter, err models.ErrorObject) {
 	writeJSONResponse(res, err.Status, models.ErrorResponse{Errors: []models.ErrorObject{err}})
 }
 
-func (handlers *Handlers) errorToHttpObjects(err error, locale string) (int, []models.ErrorObject) {
+func errorToHttpObjects(err error, locale string) (int, []models.ErrorObject) {
 	if validationErrors, ok := err.(validator.ValidationErrors); ok {
-		return http.StatusBadRequest, handlers.schemaValidator.GetTranslationErrors(validationErrors, locale)
+		return http.StatusBadRequest, schemavalidator.GetTranslationErrors(validationErrors, locale)
 	}
 
 	switch err {

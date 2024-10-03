@@ -11,18 +11,15 @@ import (
 	"github.com/ackuq/wishlist-backend/internal/api/schemavalidator"
 	"github.com/ackuq/wishlist-backend/internal/db/queries"
 	"github.com/ackuq/wishlist-backend/internal/logger"
-	"github.com/alexedwards/scs/v2"
 )
 
 type Handlers struct {
-	queries         *queries.Queries
-	schemaValidator *schemavalidator.SchemaValidator
-	auth            *auth.Authenticator
-	sessionManager  *scs.SessionManager
+	queries *queries.Queries
+	auth    *auth.Authenticator
 }
 
-func New(queries *queries.Queries, schemaValidator *schemavalidator.SchemaValidator, auth *auth.Authenticator, sessionManager *scs.SessionManager) *Handlers {
-	return &Handlers{queries, schemaValidator, auth, sessionManager}
+func New(queries *queries.Queries, auth *auth.Authenticator) *Handlers {
+	return &Handlers{queries, auth}
 }
 
 func writeJSONResponse(res http.ResponseWriter, status int, data interface{}) {
@@ -44,7 +41,7 @@ func (handlers *Handlers) bindJSON(res http.ResponseWriter, req *http.Request, r
 	err := json.NewDecoder(req.Body).Decode(result)
 
 	if err != nil {
-		handlers.handleCustomError(res, customerrors.JSONDecodingError)
+		HandleCustomError(res, customerrors.JSONDecodingError)
 		return false
 	}
 
@@ -52,19 +49,19 @@ func (handlers *Handlers) bindJSON(res http.ResponseWriter, req *http.Request, r
 
 	switch value.Kind() {
 	case reflect.Ptr:
-		if err := handlers.schemaValidator.Struct(value.Elem().Interface()); err != nil {
-			handlers.handleError(res, req, err)
+		if err := schemavalidator.ValidateStruct(value.Elem().Interface()); err != nil {
+			HandleError(res, req, err)
 			return false
 		}
 		return true
 	case reflect.Struct:
-		if err := handlers.schemaValidator.Struct(result); err != nil {
-			handlers.handleError(res, req, err)
+		if err := schemavalidator.ValidateStruct(result); err != nil {
+			HandleError(res, req, err)
 			return false
 		}
 		return true
 	}
 
-	handlers.handleCustomError(res, customerrors.InvalidResultTypeError)
+	HandleCustomError(res, customerrors.InvalidResultTypeError)
 	return false
 }

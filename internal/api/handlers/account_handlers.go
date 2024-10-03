@@ -20,7 +20,7 @@ func (handlers *Handlers) CreateAccount(res http.ResponseWriter, req *http.Reque
 	})
 
 	if err != nil {
-		handlers.handleError(res, req, err)
+		HandleError(res, req, err)
 		return
 	}
 
@@ -31,14 +31,14 @@ func (handlers *Handlers) GetAccount(res http.ResponseWriter, req *http.Request)
 	id, err := uuid.Parse(req.PathValue("id"))
 
 	if err != nil {
-		handlers.handleError(res, req, err)
+		HandleError(res, req, err)
 		return
 	}
 
 	account, err := handlers.queries.GetAccount(req.Context(), id)
 
 	if err != nil {
-		handlers.handleError(res, req, err)
+		HandleError(res, req, err)
 		return
 	}
 
@@ -55,7 +55,7 @@ func (handlers *Handlers) ListAccounts(res http.ResponseWriter, req *http.Reques
 	accounts, err := handlers.queries.ListAccounts(req.Context())
 
 	if err != nil {
-		handlers.handleError(res, req, err)
+		HandleError(res, req, err)
 	}
 
 	response := make([]models.Account, len(accounts))

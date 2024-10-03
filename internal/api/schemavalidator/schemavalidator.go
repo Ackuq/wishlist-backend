@@ -8,27 +8,26 @@ import (
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 )
 
-type SchemaValidator struct {
-	*validator.Validate
-	uni *ut.UniversalTranslator
-}
+var (
+	validate *validator.Validate
+	uni      *ut.UniversalTranslator
+)
 
-func New() *SchemaValidator {
+func Init() {
 	en := en.New()
-	uni := ut.New(en, en)
 
-	validate := validator.New(validator.WithRequiredStructEnabled())
+	uni = ut.New(en, en)
+	validate = validator.New(validator.WithRequiredStructEnabled())
 
-	// Register translations for translators
-	schemaValidator := SchemaValidator{validate, uni}
-
-	schemaValidator.registerDefaultTranslations()
-
-	return &schemaValidator
+	registerDefaultTranslations()
 }
 
-func (schemaValidator *SchemaValidator) GetTranslationErrors(errors validator.ValidationErrors, locale string) []models.ErrorObject {
-	trans, _ := schemaValidator.uni.GetTranslator("en")
+func ValidateStruct(obj any) error {
+	return validate.Struct(obj)
+}
+
+func GetTranslationErrors(errors validator.ValidationErrors, locale string) []models.ErrorObject {
+	trans, _ := uni.GetTranslator("en")
 
 	translationErrors := errors.Translate(trans)
 
@@ -43,8 +42,8 @@ func (schemaValidator *SchemaValidator) GetTranslationErrors(errors validator.Va
 	return errorObjects
 }
 
-func (schemaValidator *SchemaValidator) registerDefaultTranslations() {
+func registerDefaultTranslations() {
 	// TODO: Handle more locales
-	enTranslator, _ := schemaValidator.uni.GetTranslator("en")
-	en_translations.RegisterDefaultTranslations(schemaValidator.Validate, enTranslator)
+	enTranslator, _ := uni.GetTranslator("en")
+	en_translations.RegisterDefaultTranslations(validate, enTranslator)
 }

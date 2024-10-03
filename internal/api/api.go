@@ -23,13 +23,20 @@ func New(queries *queries.Queries, config *config.Config) error {
 		os.Exit(1)
 	}
 
-	sessionManager := sessionmanager.New()
-	schemaValidator := schemavalidator.New()
-	handlers := handlers.New(queries, schemaValidator, auth, sessionManager)
+	sessionmanager.Init()
+	schemavalidator.Init()
+	handlers := handlers.New(queries, auth)
 
 	router := routes.New(handlers)
 
 	slog.Info(fmt.Sprintf("Listing on host %s", config.Host))
+
+	return http.ListenAndServe(config.Host, withMiddlewares(router))
+}
+
+func withMiddlewares(router *http.ServeMux) http.Handler {
 	// LoadAndSave handles loading and committing session data to the session store
-	return http.ListenAndServe(config.Host, sessionManager.LoadAndSave(router))
+	withSessionManager := sessionmanager.SessionManager.LoadAndSave(router)
+
+	return withSessionManager
 }
