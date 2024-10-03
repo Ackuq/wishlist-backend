@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/ackuq/wishlist-backend/internal/api/customerrors"
 	"github.com/ackuq/wishlist-backend/internal/api/models"
 	"github.com/ackuq/wishlist-backend/internal/logger"
 	"github.com/go-playground/validator/v10"
@@ -13,11 +12,14 @@ import (
 )
 
 func (handlers *Handlers) handleError(res http.ResponseWriter, req *http.Request, err error) {
-
 	locale := req.Header.Get("Accept-Language")
 	status, errors := handlers.errorToHttpObjects(err, locale)
 
 	writeJSONResponse(res, status, models.ErrorResponse{Errors: errors})
+}
+
+func (handlers *Handlers) handleCustomError(res http.ResponseWriter, err models.ErrorObject) {
+	writeJSONResponse(res, err.Status, models.ErrorResponse{Errors: []models.ErrorObject{err}})
 }
 
 func (handlers *Handlers) errorToHttpObjects(err error, locale string) (int, []models.ErrorObject) {
@@ -28,8 +30,6 @@ func (handlers *Handlers) errorToHttpObjects(err error, locale string) (int, []m
 	switch err {
 	case pgx.ErrNoRows:
 		return http.StatusNotFound, []models.ErrorObject{models.NotFoundError(err.Error())}
-	case customerrors.ErrJSONDecoding:
-		return http.StatusBadRequest, []models.ErrorObject{models.NotFoundError(err.Error())}
 	}
 
 	if dbError, ok := err.(*pgconn.PgError); ok {

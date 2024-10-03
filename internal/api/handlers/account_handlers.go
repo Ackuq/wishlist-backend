@@ -10,8 +10,7 @@ import (
 
 func (handlers *Handlers) CreateAccount(res http.ResponseWriter, req *http.Request) {
 	body := &models.CreateAccount{}
-	if err := handlers.schemaValidator.BindJSON(req, body); err != nil {
-		handlers.handleError(res, req, err)
+	if ok := handlers.bindJSON(res, req, body); !ok {
 		return
 	}
 
