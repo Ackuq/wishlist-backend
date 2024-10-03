@@ -40,13 +40,14 @@ const AccessTokenSessionKey = "access_token"
 const ClaimsSessionKey = "claims"
 
 func Init(config *config.Config) error {
-	provider, err := oidc.NewProvider(
+	_provider, err := oidc.NewProvider(
 		context.Background(),
 		fmt.Sprintf("https://%s/", config.Auth0.Domain),
 	)
 	if err != nil {
 		return err
 	}
+	provider = _provider
 
 	authConfig = oauth2.Config{
 		ClientID:     config.Auth0.ClientID,
