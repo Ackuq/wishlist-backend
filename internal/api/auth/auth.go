@@ -88,7 +88,7 @@ func GetClientId() string {
 }
 
 func NewLogoutUrl() (*url.URL, error) {
-	return url.Parse(fmt.Sprintf("https://%s/v2/logout", logoutUrl))
+	return url.Parse(logoutUrl)
 }
 
 func GetAuthCodeUrl(state string) string {
