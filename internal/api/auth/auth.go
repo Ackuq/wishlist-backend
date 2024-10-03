@@ -12,9 +12,11 @@ import (
 )
 
 var (
-	provider   *oidc.Provider
-	authConfig oauth2.Config
-	logoutUrl  string
+	provider             *oidc.Provider
+	authConfig           oauth2.Config
+	logoutUrl            string
+	validLoginRedirects  []string
+	validLogoutRedirects []string
 )
 
 type Claims struct {
@@ -58,6 +60,8 @@ func Init(config *config.Config) error {
 	}
 
 	logoutUrl = fmt.Sprintf("https://%s/v2/logout", config.Auth0.Domain)
+	validLoginRedirects = config.Redirects.ValidLoginRedirects
+	validLogoutRedirects = config.Redirects.ValidLogoutRedirects
 
 	return nil
 }
@@ -84,7 +88,7 @@ func GetClientId() string {
 }
 
 func NewLogoutUrl() (*url.URL, error) {
-	return url.Parse(fmt.Sprintf("https://%s/v2/logout", logoutUrl))
+	return url.Parse(logoutUrl)
 }
 
 func GetAuthCodeUrl(state string) string {

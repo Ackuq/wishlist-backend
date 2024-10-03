@@ -1,9 +1,6 @@
 package handlers
 
 import (
-	"crypto/rand"
-	"encoding/base64"
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -11,12 +8,24 @@ import (
 	"github.com/ackuq/wishlist-backend/internal/api/customerrors"
 	"github.com/ackuq/wishlist-backend/internal/api/models"
 	"github.com/ackuq/wishlist-backend/internal/api/sessionmanager"
+	"github.com/ackuq/wishlist-backend/internal/utils"
 )
 
 func (handlers *Handlers) AuthLogin(res http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	state, err := generateInitialState()
+	returnTo := req.URL.Query().Get("return_to")
 
+	if ok := auth.ValidateLoginRedirect(returnTo); !ok {
+		HandleCustomError(res, customerrors.InvalidReturnToURL)
+		return
+	}
+
+	state, err := auth.NewAuthState(returnTo)
+	if err != nil {
+		HandleError(res, req, err)
+		return
+	}
+	stateStr, err := utils.EncodeToBase64(state)
 	if err != nil {
 		HandleError(res, req, err)
 		return
@@ -26,29 +35,27 @@ func (handlers *Handlers) AuthLogin(res http.ResponseWriter, req *http.Request) 
 	sessionManager := sessionmanager.Get()
 	sessionManager.Put(ctx, auth.StateSessionKey, state)
 
-	http.Redirect(res, req, auth.GetAuthCodeUrl(state), http.StatusTemporaryRedirect)
-}
-
-func generateInitialState() (string, error) {
-	b := make([]byte, 32)
-	_, err := rand.Read(b)
-	if err != nil {
-		return "", err
-	}
-
-	state := base64.StdEncoding.EncodeToString(b)
-
-	return state, nil
+	http.Redirect(res, req, auth.GetAuthCodeUrl(stateStr), http.StatusTemporaryRedirect)
 }
 
 func (handlers *Handlers) AuthCallback(res http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	sessionManager := sessionmanager.Get()
 
-	sessionState := sessionManager.GetString(ctx, auth.StateSessionKey)
+	sessionState, ok := sessionManager.Get(ctx, auth.StateSessionKey).(auth.AuthState)
+	if !ok {
+		HandleCustomError(res, customerrors.InvalidSessionStateError)
+		return
+	}
 	queryParams := req.URL.Query()
+	queryState := &auth.AuthState{}
+	if err := utils.DecodeFromBase64(queryState, queryParams.Get("state")); err != nil {
+		HandleError(res, req, err)
+		return
+	}
+
 	// Verify state is valid
-	if sessionState != queryParams.Get("state") {
+	if sessionState.Checksum != queryState.Checksum || sessionState.ReturnTo != queryState.ReturnTo {
 		HandleCustomError(res, customerrors.InvalidStateParameterError)
 		return
 	}
@@ -74,7 +81,7 @@ func (handlers *Handlers) AuthCallback(res http.ResponseWriter, req *http.Reques
 	sessionManager.Put(ctx, auth.AccessTokenSessionKey, token.AccessToken)
 	sessionManager.Put(ctx, auth.ClaimsSessionKey, claims)
 
-	res.WriteHeader(http.StatusCreated)
+	http.Redirect(res, req, sessionState.ReturnTo, http.StatusTemporaryRedirect)
 }
 
 func (handlers *Handlers) AuthLogout(res http.ResponseWriter, req *http.Request) {
@@ -85,24 +92,20 @@ func (handlers *Handlers) AuthLogout(res http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	scheme := "http"
-	if req.TLS != nil {
-		scheme = "https"
-	}
+	// Destroy session
+	sessionManager.Destroy(req.Context())
 
-	returnTo, err := url.Parse(fmt.Sprintf("%s://%s", scheme, req.Host))
-	if err != nil {
-		HandleError(res, req, err)
+	// Get the return url
+	returnTo := req.URL.Query().Get("return_to")
+	if ok := auth.ValidateLogoutRedirect(returnTo); !ok {
+		HandleCustomError(res, customerrors.InvalidReturnToURL)
 		return
 	}
 
 	parameters := url.Values{}
-	parameters.Add("returnTo", returnTo.String())
+	parameters.Add("returnTo", returnTo)
 	parameters.Add("client_id", auth.GetClientId())
 	logoutUrl.RawQuery = parameters.Encode()
-
-	// Destroy session
-	sessionManager.Destroy(req.Context())
 
 	// Unauthenticate with Auth0
 	http.Redirect(res, req, logoutUrl.String(), http.StatusTemporaryRedirect)
