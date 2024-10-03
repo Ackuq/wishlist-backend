@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 
@@ -16,7 +15,7 @@ func (handlers *Handlers) AuthLogin(res http.ResponseWriter, req *http.Request) 
 	ctx := req.Context()
 	returnTo := req.URL.Query().Get("return_to")
 
-	if ok := auth.ValidateReturnTo(returnTo); !ok {
+	if ok := auth.ValidateLoginRedirect(returnTo); !ok {
 		HandleCustomError(res, customerrors.InvalidReturnToURL)
 		return
 	}
@@ -93,24 +92,20 @@ func (handlers *Handlers) AuthLogout(res http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	scheme := "http"
-	if req.TLS != nil {
-		scheme = "https"
-	}
+	// Destroy session
+	sessionManager.Destroy(req.Context())
 
-	returnTo, err := url.Parse(fmt.Sprintf("%s://%s", scheme, req.Host))
-	if err != nil {
-		HandleError(res, req, err)
+	// Get the return url
+	returnTo := req.URL.Query().Get("return_to")
+	if ok := auth.ValidateLoginRedirect(returnTo); !ok {
+		HandleCustomError(res, customerrors.InvalidReturnToURL)
 		return
 	}
 
 	parameters := url.Values{}
-	parameters.Add("returnTo", returnTo.String())
+	parameters.Add("returnTo", returnTo)
 	parameters.Add("client_id", auth.GetClientId())
 	logoutUrl.RawQuery = parameters.Encode()
-
-	// Destroy session
-	sessionManager.Destroy(req.Context())
 
 	// Unauthenticate with Auth0
 	http.Redirect(res, req, logoutUrl.String(), http.StatusTemporaryRedirect)

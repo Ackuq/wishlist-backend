@@ -14,8 +14,11 @@ type Config struct {
 	CORS struct {
 		AllowedOrigins []string
 	}
-	ValidLoginRedirects []string
-	Auth0               struct {
+	Redirects struct {
+		ValidLoginRedirects  []string
+		ValidLogoutRedirects []string
+	}
+	Auth0 struct {
 		Domain       string
 		ClientID     string
 		ClientSecret string
@@ -37,7 +40,11 @@ func GetConfig() *Config {
 
 	var validLoginRedirects string
 	flag.StringVar(&validLoginRedirects, "valid-login-redirects", os.Getenv("VALID_LOGIN_REDIRECTS"), "Comma separated list with valid redirect locations after authentication")
-	config.ValidLoginRedirects = strings.Split(validLoginRedirects, ",")
+	config.Redirects.ValidLoginRedirects = strings.Split(validLoginRedirects, ",")
+
+	var validLogOutRedirects string
+	flag.StringVar(&validLoginRedirects, "valid-logout-redirects", os.Getenv("VALID_LOGOUT_REDIRECTS"), "Comma separated list with valid redirect locations after logging out")
+	config.Redirects.ValidLogoutRedirects = strings.Split(validLogOutRedirects, ",")
 
 	var corsOrigins string
 	flag.StringVar(&corsOrigins, "cors-origins", os.Getenv("CORS_ALLOWED_ORIGINS"), "Comma separated list of CORS origins")

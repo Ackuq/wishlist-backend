@@ -24,11 +24,21 @@ func NewAuthState(returnTo string) (*AuthState, error) {
 	return &state, nil
 }
 
-func ValidateReturnTo(returnTo string) bool {
+func ValidateLoginRedirect(returnTo string) bool {
 	if returnTo == "" {
 		return false
 	}
 	if !slices.Contains(validLoginRedirects, returnTo) {
+		return false
+	}
+	return true
+}
+
+func ValidateLogoutRedirect(returnTo string) bool {
+	if returnTo == "" {
+		return false
+	}
+	if !slices.Contains(validLogoutRedirects, returnTo) {
 		return false
 	}
 	return true
