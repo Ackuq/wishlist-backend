@@ -8,7 +8,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 )
 
-var SessionManager *scs.SessionManager
+var sessionManager *scs.SessionManager
 
 func Init() {
 	// TODO: Add Redis store for sessions
@@ -17,7 +17,11 @@ func Init() {
 	gob.Register(auth.Claims{})
 
 	// Create session manager
-	SessionManager = scs.New()
-	SessionManager.Lifetime = 24 * time.Hour
-	SessionManager.Cookie.Name = "session_id"
+	sessionManager = scs.New()
+	sessionManager.Lifetime = 24 * time.Hour
+	sessionManager.Cookie.Name = "session_id"
+}
+
+func Get() *scs.SessionManager {
+	return sessionManager
 }

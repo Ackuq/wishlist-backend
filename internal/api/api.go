@@ -36,7 +36,7 @@ func New(queries *queries.Queries, config *config.Config) error {
 
 func withMiddlewares(router *http.ServeMux) http.Handler {
 	// LoadAndSave handles loading and committing session data to the session store
-	withSessionManager := sessionmanager.SessionManager.LoadAndSave(router)
+	withSessionManager := sessionmanager.Get().LoadAndSave(router)
 
 	return withSessionManager
 }

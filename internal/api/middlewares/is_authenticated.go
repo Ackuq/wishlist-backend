@@ -12,7 +12,8 @@ import (
 func WithAuthentication(next func(http.ResponseWriter, *http.Request, auth.Claims)) http.HandlerFunc {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
-		claims, ok := sessionmanager.SessionManager.Get(ctx, auth.ClaimsSessionKey).(auth.Claims)
+		sessionManager := sessionmanager.Get()
+		claims, ok := sessionManager.Get(ctx, auth.ClaimsSessionKey).(auth.Claims)
 
 		if !ok {
 			handlers.HandleCustomError(res, customerrors.Unauthenticated)
