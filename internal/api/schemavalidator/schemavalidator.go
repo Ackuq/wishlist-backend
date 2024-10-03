@@ -1,12 +1,6 @@
 package schemavalidator
 
 import (
-	"encoding/json"
-	"errors"
-	"net/http"
-	"reflect"
-
-	"github.com/ackuq/wishlist-backend/internal/api/customerrors"
 	"github.com/ackuq/wishlist-backend/internal/api/models"
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
@@ -15,8 +9,8 @@ import (
 )
 
 type SchemaValidator struct {
-	validate *validator.Validate
-	uni      *ut.UniversalTranslator
+	*validator.Validate
+	uni *ut.UniversalTranslator
 }
 
 func New() *SchemaValidator {
@@ -31,27 +25,6 @@ func New() *SchemaValidator {
 	schemaValidator.registerDefaultTranslations()
 
 	return &schemaValidator
-}
-
-func (schemaValidator *SchemaValidator) BindJSON(req *http.Request, result any) error {
-	err := json.NewDecoder(req.Body).Decode(result)
-
-	if err != nil {
-		return customerrors.ErrJSONDecoding
-	}
-
-	value := reflect.ValueOf(result)
-
-	switch value.Kind() {
-	case reflect.Ptr:
-		err := schemaValidator.validate.Struct(value.Elem().Interface())
-		return err
-	case reflect.Struct:
-		err := schemaValidator.validate.Struct(result)
-		return err
-	}
-
-	return errors.New("invalid result type")
 }
 
 func (schemaValidator *SchemaValidator) GetTranslationErrors(errors validator.ValidationErrors, locale string) []models.ErrorObject {
@@ -73,5 +46,5 @@ func (schemaValidator *SchemaValidator) GetTranslationErrors(errors validator.Va
 func (schemaValidator *SchemaValidator) registerDefaultTranslations() {
 	// TODO: Handle more locales
 	enTranslator, _ := schemaValidator.uni.GetTranslator("en")
-	en_translations.RegisterDefaultTranslations(schemaValidator.validate, enTranslator)
+	en_translations.RegisterDefaultTranslations(schemaValidator.Validate, enTranslator)
 }
