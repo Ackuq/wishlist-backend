@@ -14,6 +14,7 @@ import (
 	"github.com/ackuq/wishlist-backend/internal/config"
 	"github.com/ackuq/wishlist-backend/internal/db/queries"
 	"github.com/ackuq/wishlist-backend/internal/logger"
+	"github.com/rs/cors"
 )
 
 func New(queries *queries.Queries, config *config.Config) error {
@@ -37,6 +38,8 @@ func New(queries *queries.Queries, config *config.Config) error {
 func withMiddlewares(router *http.ServeMux) http.Handler {
 	// LoadAndSave handles loading and committing session data to the session store
 	withSessionManager := sessionmanager.Get().LoadAndSave(router)
+	// TODO: This should be more strict if this ever gets deployed...
+	withCors := cors.AllowAll().Handler(withSessionManager)
 
-	return withSessionManager
+	return withCors
 }

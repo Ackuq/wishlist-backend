@@ -15,6 +15,7 @@ func Init() {
 
 	// Register custom structs
 	gob.Register(auth.Claims{})
+	gob.Register(auth.AuthState{})
 
 	// Create session manager
 	sessionManager = scs.New()

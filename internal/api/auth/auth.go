@@ -12,9 +12,10 @@ import (
 )
 
 var (
-	provider   *oidc.Provider
-	authConfig oauth2.Config
-	logoutUrl  string
+	provider            *oidc.Provider
+	authConfig          oauth2.Config
+	logoutUrl           string
+	validLoginRedirects []string
 )
 
 type Claims struct {
@@ -58,6 +59,7 @@ func Init(config *config.Config) error {
 	}
 
 	logoutUrl = fmt.Sprintf("https://%s/v2/logout", config.Auth0.Domain)
+	validLoginRedirects = config.ValidLoginRedirects
 
 	return nil
 }
