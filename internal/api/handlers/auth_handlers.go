@@ -26,7 +26,7 @@ func (handlers *Handlers) AuthLogin(res http.ResponseWriter, req *http.Request) 
 	sessionManager := sessionmanager.Get()
 	sessionManager.Put(ctx, auth.StateSessionKey, state)
 
-	http.Redirect(res, req, handlers.auth.AuthCodeURL(state), http.StatusTemporaryRedirect)
+	http.Redirect(res, req, auth.GetAuthCodeUrl(state), http.StatusTemporaryRedirect)
 }
 
 func generateInitialState() (string, error) {
@@ -53,13 +53,13 @@ func (handlers *Handlers) AuthCallback(res http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	token, err := handlers.auth.Exchange(ctx, queryParams.Get("code"))
+	token, err := auth.ExchangeCodeForToken(ctx, queryParams.Get("code"))
 	if err != nil {
 		HandleCustomError(res, customerrors.ExchangeFailedError)
 		return
 	}
 
-	idToken, err := handlers.auth.VerifyIDToken(ctx, token)
+	idToken, err := auth.VerifyIDToken(ctx, token)
 	if err != nil {
 		HandleCustomError(res, customerrors.VerifyFailedError)
 		return
@@ -79,7 +79,7 @@ func (handlers *Handlers) AuthCallback(res http.ResponseWriter, req *http.Reques
 
 func (handlers *Handlers) AuthLogout(res http.ResponseWriter, req *http.Request) {
 	sessionManager := sessionmanager.Get()
-	logoutUrl, err := url.Parse(handlers.auth.LogoutUrl)
+	logoutUrl, err := auth.NewLogoutUrl()
 	if err != nil {
 		HandleError(res, req, err)
 		return
@@ -98,7 +98,7 @@ func (handlers *Handlers) AuthLogout(res http.ResponseWriter, req *http.Request)
 
 	parameters := url.Values{}
 	parameters.Add("returnTo", returnTo.String())
-	parameters.Add("client_id", handlers.auth.ClientID)
+	parameters.Add("client_id", auth.GetClientId())
 	logoutUrl.RawQuery = parameters.Encode()
 
 	// Destroy session

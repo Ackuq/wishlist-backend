@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/ackuq/wishlist-backend/internal/api/auth"
 	"github.com/ackuq/wishlist-backend/internal/api/customerrors"
 	"github.com/ackuq/wishlist-backend/internal/api/schemavalidator"
 	"github.com/ackuq/wishlist-backend/internal/db/queries"
@@ -15,11 +14,10 @@ import (
 
 type Handlers struct {
 	queries *queries.Queries
-	auth    *auth.Authenticator
 }
 
-func New(queries *queries.Queries, auth *auth.Authenticator) *Handlers {
-	return &Handlers{queries, auth}
+func New(queries *queries.Queries) *Handlers {
+	return &Handlers{queries}
 }
 
 func writeJSONResponse(res http.ResponseWriter, status int, data interface{}) {

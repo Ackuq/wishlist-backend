@@ -17,7 +17,7 @@ import (
 )
 
 func New(queries *queries.Queries, config *config.Config) error {
-	auth, err := auth.New(config)
+	err := auth.Init(config)
 	if err != nil {
 		slog.Error("Error setting up auth", logger.ErrorAtr(err))
 		os.Exit(1)
@@ -25,7 +25,7 @@ func New(queries *queries.Queries, config *config.Config) error {
 
 	sessionmanager.Init()
 	schemavalidator.Init()
-	handlers := handlers.New(queries, auth)
+	handlers := handlers.New(queries)
 
 	router := routes.New(handlers)
 
