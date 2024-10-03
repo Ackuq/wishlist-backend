@@ -42,9 +42,9 @@ func GetConfig() *Config {
 	flag.StringVar(&validLoginRedirects, "valid-login-redirects", os.Getenv("VALID_LOGIN_REDIRECTS"), "Comma separated list with valid redirect locations after authentication")
 	config.Redirects.ValidLoginRedirects = strings.Split(validLoginRedirects, ",")
 
-	var validLogOutRedirects string
-	flag.StringVar(&validLoginRedirects, "valid-logout-redirects", os.Getenv("VALID_LOGOUT_REDIRECTS"), "Comma separated list with valid redirect locations after logging out")
-	config.Redirects.ValidLogoutRedirects = strings.Split(validLogOutRedirects, ",")
+	var validLogoutRedirects string
+	flag.StringVar(&validLogoutRedirects, "valid-logout-redirects", os.Getenv("VALID_LOGOUT_REDIRECTS"), "Comma separated list with valid redirect locations after logging out")
+	config.Redirects.ValidLogoutRedirects = strings.Split(validLogoutRedirects, ",")
 
 	var corsOrigins string
 	flag.StringVar(&corsOrigins, "cors-origins", os.Getenv("CORS_ALLOWED_ORIGINS"), "Comma separated list of CORS origins")
