@@ -11,4 +11,5 @@ var InvalidResultTypeError = models.ServerError("Invalid result type.")
 // Auth errors
 var InvalidStateParameterError = models.BadRequestError("Invalid state parameter.")
 var ExchangeFailedError = models.UnauthorizedError("Failed to exchange an authorization code for a token.")
+var Unauthenticated = models.UnauthorizedError("Authentication not found.")
 var VerifyFailedError = models.ServerError("Failed to verify ID Token")
