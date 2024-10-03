@@ -10,25 +10,23 @@ import (
 	"github.com/ackuq/wishlist-backend/internal/api/auth"
 	"github.com/ackuq/wishlist-backend/internal/api/customerrors"
 	"github.com/ackuq/wishlist-backend/internal/api/models"
+	"github.com/ackuq/wishlist-backend/internal/api/sessionmanager"
 )
-
-const stateSessionKey = "state"
-const accessTokenSessionKey = "access_token"
-const claimsSessionKey = "claims"
 
 func (handlers *Handlers) AuthLogin(res http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	state, err := generateInitialState()
 
 	if err != nil {
-		handlers.handleError(res, req, err)
+		HandleError(res, req, err)
 		return
 	}
 
 	// Save state inside session
-	handlers.sessionManager.Put(ctx, stateSessionKey, state)
+	sessionManager := sessionmanager.Get()
+	sessionManager.Put(ctx, auth.StateSessionKey, state)
 
-	http.Redirect(res, req, handlers.auth.AuthCodeURL(state), http.StatusTemporaryRedirect)
+	http.Redirect(res, req, auth.GetAuthCodeUrl(state), http.StatusTemporaryRedirect)
 }
 
 func generateInitialState() (string, error) {
@@ -45,42 +43,45 @@ func generateInitialState() (string, error) {
 
 func (handlers *Handlers) AuthCallback(res http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	sessionState := handlers.sessionManager.GetString(ctx, stateSessionKey)
+	sessionManager := sessionmanager.Get()
+
+	sessionState := sessionManager.GetString(ctx, auth.StateSessionKey)
 	queryParams := req.URL.Query()
 	// Verify state is valid
-	if sessionState != queryParams.Get(stateSessionKey) {
-		handlers.handleCustomError(res, customerrors.InvalidStateParameterError)
+	if sessionState != queryParams.Get("state") {
+		HandleCustomError(res, customerrors.InvalidStateParameterError)
 		return
 	}
 
-	token, err := handlers.auth.Exchange(ctx, queryParams.Get("code"))
+	token, err := auth.ExchangeCodeForToken(ctx, queryParams.Get("code"))
 	if err != nil {
-		handlers.handleCustomError(res, customerrors.ExchangeFailedError)
+		HandleCustomError(res, customerrors.ExchangeFailedError)
 		return
 	}
 
-	idToken, err := handlers.auth.VerifyIDToken(ctx, token)
+	idToken, err := auth.VerifyIDToken(ctx, token)
 	if err != nil {
-		handlers.handleCustomError(res, customerrors.VerifyFailedError)
+		HandleCustomError(res, customerrors.VerifyFailedError)
 		return
 	}
 
 	var claims auth.Claims
 	if err := idToken.Claims(&claims); err != nil {
-		handlers.handleError(res, req, err)
+		HandleError(res, req, err)
 		return
 	}
 
-	handlers.sessionManager.Put(ctx, accessTokenSessionKey, token.AccessToken)
-	handlers.sessionManager.Put(ctx, claimsSessionKey, claims)
+	sessionManager.Put(ctx, auth.AccessTokenSessionKey, token.AccessToken)
+	sessionManager.Put(ctx, auth.ClaimsSessionKey, claims)
 
 	res.WriteHeader(http.StatusCreated)
 }
 
 func (handlers *Handlers) AuthLogout(res http.ResponseWriter, req *http.Request) {
-	logoutUrl, err := url.Parse(handlers.auth.LogoutUrl)
+	sessionManager := sessionmanager.Get()
+	logoutUrl, err := auth.NewLogoutUrl()
 	if err != nil {
-		handlers.handleError(res, req, err)
+		HandleError(res, req, err)
 		return
 	}
 
@@ -91,35 +92,26 @@ func (handlers *Handlers) AuthLogout(res http.ResponseWriter, req *http.Request)
 
 	returnTo, err := url.Parse(fmt.Sprintf("%s://%s", scheme, req.Host))
 	if err != nil {
-		handlers.handleError(res, req, err)
+		HandleError(res, req, err)
 		return
 	}
 
 	parameters := url.Values{}
 	parameters.Add("returnTo", returnTo.String())
-	parameters.Add("client_id", handlers.auth.ClientID)
+	parameters.Add("client_id", auth.GetClientId())
 	logoutUrl.RawQuery = parameters.Encode()
 
 	// Destroy session
-	handlers.sessionManager.Destroy(req.Context())
+	sessionManager.Destroy(req.Context())
 
 	// Unauthenticate with Auth0
 	http.Redirect(res, req, logoutUrl.String(), http.StatusTemporaryRedirect)
 }
 
-func (handlers *Handlers) AuthUser(res http.ResponseWriter, req *http.Request) {
-	ctx := req.Context()
-	claims, ok := handlers.sessionManager.Get(ctx, claimsSessionKey).(auth.Claims)
-
-	if !ok {
-		handlers.handleCustomError(res, customerrors.Unauthenticated)
-		return
-	}
-
+func (handlers *Handlers) AuthUser(res http.ResponseWriter, req *http.Request, claims auth.Claims) {
 	user := models.User{
 		Name:  claims.Name,
 		Email: claims.Email,
 	}
-
 	writeJSONResponse(res, http.StatusOK, user)
 }

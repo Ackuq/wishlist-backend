@@ -14,7 +14,3 @@ func New(handlers *handlers.Handlers) *http.ServeMux {
 
 	return router
 }
-
-func wrapHandler(handler func(res http.ResponseWriter, req *http.Request)) http.Handler {
-	return http.HandlerFunc(handler)
-}

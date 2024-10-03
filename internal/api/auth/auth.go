@@ -4,17 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 
 	"github.com/ackuq/wishlist-backend/internal/config"
 	"github.com/coreos/go-oidc/v3/oidc"
 	"golang.org/x/oauth2"
 )
 
-type Authenticator struct {
-	*oidc.Provider
-	oauth2.Config
-	LogoutUrl string
-}
+var (
+	provider   *oidc.Provider
+	authConfig oauth2.Config
+	logoutUrl  string
+)
 
 type Claims struct {
 	// OpenID scope
@@ -34,17 +35,21 @@ type Claims struct {
 	EmailVerified bool   `json:"email_verified"`
 }
 
-func New(config *config.Config) (*Authenticator, error) {
+const StateSessionKey = "state"
+const AccessTokenSessionKey = "access_token"
+const ClaimsSessionKey = "claims"
 
-	provider, err := oidc.NewProvider(
+func Init(config *config.Config) error {
+	_provider, err := oidc.NewProvider(
 		context.Background(),
 		fmt.Sprintf("https://%s/", config.Auth0.Domain),
 	)
 	if err != nil {
-		return nil, err
+		return err
 	}
+	provider = _provider
 
-	authConfig := oauth2.Config{
+	authConfig = oauth2.Config{
 		ClientID:     config.Auth0.ClientID,
 		ClientSecret: config.Auth0.ClientSecret,
 		RedirectURL:  config.Auth0.CallbackURL,
@@ -52,20 +57,36 @@ func New(config *config.Config) (*Authenticator, error) {
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 
-	logoutUrl := fmt.Sprintf("https://%s/v2/logout", config.Auth0.Domain)
+	logoutUrl = fmt.Sprintf("https://%s/v2/logout", config.Auth0.Domain)
 
-	return &Authenticator{provider, authConfig, logoutUrl}, nil
+	return nil
 }
 
-func (auth *Authenticator) VerifyIDToken(ctx context.Context, token *oauth2.Token) (*oidc.IDToken, error) {
+func VerifyIDToken(ctx context.Context, token *oauth2.Token) (*oidc.IDToken, error) {
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
 		return nil, errors.New("no id_token field in oauth2 token")
 	}
 
 	oidcConfig := &oidc.Config{
-		ClientID: auth.ClientID,
+		ClientID: authConfig.ClientID,
 	}
 
-	return auth.Verifier(oidcConfig).Verify(ctx, rawIDToken)
+	return provider.Verifier(oidcConfig).Verify(ctx, rawIDToken)
+}
+
+func ExchangeCodeForToken(ctx context.Context, code string) (*oauth2.Token, error) {
+	return authConfig.Exchange(ctx, code)
+}
+
+func GetClientId() string {
+	return authConfig.ClientID
+}
+
+func NewLogoutUrl() (*url.URL, error) {
+	return url.Parse(fmt.Sprintf("https://%s/v2/logout", logoutUrl))
+}
+
+func GetAuthCodeUrl(state string) string {
+	return authConfig.AuthCodeURL(state)
 }
