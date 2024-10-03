@@ -16,6 +16,24 @@ type Authenticator struct {
 	LogoutUrl string
 }
 
+type Claims struct {
+	// OpenID scope
+	Issuer   string  `json:"iss"`
+	Subject  string  `json:"sub"`
+	Audience string  `json:"aud"`
+	Expiry   float64 `json:"exp"`
+	IssuedAt float64 `json:"iat"`
+	// Profile
+	Name       string `json:"name"`
+	FamilyName string `json:"family_name"`
+	GivenName  string `json:"given_name"`
+	Nickname   string `json:"nickname"`
+	Picture    string `json:"picture"`
+	// Email scope
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+}
+
 func New(config *config.Config) (*Authenticator, error) {
 
 	provider, err := oidc.NewProvider(
@@ -31,7 +49,7 @@ func New(config *config.Config) (*Authenticator, error) {
 		ClientSecret: config.Auth0.ClientSecret,
 		RedirectURL:  config.Auth0.CallbackURL,
 		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "profile"},
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 
 	logoutUrl := fmt.Sprintf("https://%s/v2/logout", config.Auth0.Domain)

@@ -7,10 +7,12 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/ackuq/wishlist-backend/internal/api/auth"
 	"github.com/ackuq/wishlist-backend/internal/api/customerrors"
 )
 
 func (handlers *Handlers) AuthLogin(res http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
 	state, err := generateInitialState()
 
 	if err != nil {
@@ -19,7 +21,7 @@ func (handlers *Handlers) AuthLogin(res http.ResponseWriter, req *http.Request) 
 	}
 
 	// Save state inside session
-	handlers.sessionManager.Put(req.Context(), "state", state)
+	handlers.sessionManager.Put(ctx, "state", state)
 
 	http.Redirect(res, req, handlers.auth.AuthCodeURL(state), http.StatusTemporaryRedirect)
 }
@@ -37,7 +39,8 @@ func generateInitialState() (string, error) {
 }
 
 func (handlers *Handlers) AuthCallback(res http.ResponseWriter, req *http.Request) {
-	sessionState := handlers.sessionManager.GetString(req.Context(), "state")
+	ctx := req.Context()
+	sessionState := handlers.sessionManager.GetString(ctx, "state")
 	queryParams := req.URL.Query()
 	// Verify state is valid
 	if sessionState != queryParams.Get("state") {
@@ -45,26 +48,26 @@ func (handlers *Handlers) AuthCallback(res http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	token, err := handlers.auth.Exchange(req.Context(), queryParams.Get("code"))
+	token, err := handlers.auth.Exchange(ctx, queryParams.Get("code"))
 	if err != nil {
 		handlers.handleCustomError(res, customerrors.ExchangeFailedError)
 		return
 	}
 
-	idToken, err := handlers.auth.VerifyIDToken(req.Context(), token)
+	idToken, err := handlers.auth.VerifyIDToken(ctx, token)
 	if err != nil {
 		handlers.handleCustomError(res, customerrors.VerifyFailedError)
 		return
 	}
 
-	var profile map[string]any
-	if err := idToken.Claims(&profile); err != nil {
+	var claims auth.Claims
+	if err := idToken.Claims(&claims); err != nil {
 		handlers.handleError(res, req, err)
 		return
 	}
 
-	handlers.sessionManager.Put(req.Context(), "access_token", token.AccessToken)
-	handlers.sessionManager.Put(req.Context(), "profile", profile)
+	handlers.sessionManager.Put(ctx, "access_token", token.AccessToken)
+	handlers.sessionManager.Put(ctx, "claims", claims)
 
 	res.WriteHeader(http.StatusCreated)
 }
