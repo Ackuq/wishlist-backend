@@ -97,7 +97,7 @@ func (handlers *Handlers) AuthLogout(res http.ResponseWriter, req *http.Request)
 
 	// Get the return url
 	returnTo := req.URL.Query().Get("return_to")
-	if ok := auth.ValidateLoginRedirect(returnTo); !ok {
+	if ok := auth.ValidateLogoutRedirect(returnTo); !ok {
 		HandleCustomError(res, customerrors.InvalidReturnToURL)
 		return
 	}
