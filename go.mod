@@ -1,16 +1,17 @@
 module github.com/ackuq/wishlist-backend
 
 go 1.23.1
+toolchain go1.24.1
 
 require (
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/coreos/go-oidc/v3 v3.13.0
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
-	github.com/go-playground/validator/v10 v10.25.0
+	github.com/go-playground/validator/v10 v10.26.0
 	github.com/golang-migrate/migrate/v4 v4.18.2
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.7.2
+	github.com/jackc/pgx/v5 v5.7.4
 	github.com/joho/godotenv v1.5.1
 	github.com/rs/cors v1.11.1
 	github.com/vgarvardt/pgx-google-uuid/v5 v5.6.0
